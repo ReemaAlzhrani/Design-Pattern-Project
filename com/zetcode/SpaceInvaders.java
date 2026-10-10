@@ -12,7 +12,7 @@ public class SpaceInvaders extends JFrame  {
 
     private void initUI() {
 
-        add(new Board());
+        add(Board.getInstance());
 
         setTitle("Space Invaders");
         setSize(Commons.BOARD_WIDTH, Commons.BOARD_HEIGHT);

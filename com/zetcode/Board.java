@@ -23,6 +23,8 @@ import java.util.Random;
 
 public class Board extends JPanel {
 
+    private static Board instance;
+
     private Dimension d;
     private List<Alien> aliens;
     private Player player;
@@ -38,10 +40,20 @@ public class Board extends JPanel {
     private Timer timer;
 
 
-    public Board() {
+    private Board() {
 
         initBoard();
         gameInit();
+    }
+
+
+    public static synchronized Board getInstance() {
+
+        if (instance == null) {
+            instance = new Board();
+        }
+
+        return instance;
     }
 
     private void initBoard() {
