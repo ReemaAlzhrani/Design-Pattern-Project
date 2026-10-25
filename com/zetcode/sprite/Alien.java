@@ -1,10 +1,11 @@
 package com.zetcode.sprite;
 
 import javax.swing.ImageIcon; //عشان ننسخ الصوره بدون يرجع للملف  
-
 import java.awt.Image;
+import java.awt.Graphics;
+import java.awt.image.ImageObserver;
 
-public class Alien extends Sprite implements Cloneable {
+public class Alien extends Sprite implements Cloneable, GameComponent {
 
     private Bomb bomb;
 
@@ -50,6 +51,33 @@ public class Alien extends Sprite implements Cloneable {
     public void act(int direction) {
 
         this.x += direction;
+    }
+
+    // Composite Pattern - Leaf
+    @Override
+    public void move(int direction) {
+
+        if (isVisible()) {
+            act(direction);
+        }
+    }
+
+    @Override
+    public void moveDown(int distance) {
+
+        setY(getY() + distance);
+    }
+
+    @Override
+    public void draw(Graphics g, ImageObserver observer) {
+
+        if (isVisible()) {
+            g.drawImage(getImage(), getX(), getY(), observer);
+        }
+
+        if (isDying()) {
+            die();
+        }
     }
 
     public Bomb getBomb() {

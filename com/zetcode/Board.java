@@ -1,6 +1,7 @@
 package com.zetcode;
 
 import com.zetcode.sprite.Alien;
+import com.zetcode.sprite.AlienGroup;
 import com.zetcode.sprite.Player;
 import com.zetcode.sprite.Shot;
 
@@ -27,6 +28,7 @@ public class Board extends JPanel {
 // انستانت عشن نحفظ نسخه وحده 
     private Dimension d;
     private List<Alien> aliens;
+    private AlienGroup alienFleet;
     private Player player;
     private Shot shot;
     
@@ -34,7 +36,7 @@ public class Board extends JPanel {
     private int deaths = 0;
 
     private boolean inGame = true;
-    private String explImg = "images/explosion.png";
+    private String explImg = "src/images/explosion.png";
     private String message = "Game Over";
 
     private Timer timer;
@@ -45,7 +47,6 @@ public class Board extends JPanel {
     private Board() { // عشان محد يوصل له من برا 
 
         initBoard();
-        gameInit();
     }
 
 
@@ -71,31 +72,36 @@ public class Board extends JPanel {
         gameInit();
     }
 
-
     private void gameInit() {
 
         aliens = new ArrayList<>();
+        alienFleet = new AlienGroup();
 
-        Alien alienPrototype = new Alien( // الاساسي 
+        Alien alienPrototype = new Alien(
                 Commons.ALIEN_INIT_X,
                 Commons.ALIEN_INIT_Y
         );
 
-        for (int i = 0; i < 4; i++) { // الصفوف 
-            for (int j = 0; j < 6; j++) { // الاعمده
+        for (int i = 0; i < 4; i++) {
 
-                int x = Commons.ALIEN_INIT_X + 18 * j; // اغير واتحكم في الكوبي 
+            AlienGroup row = new AlienGroup();
+            alienFleet.add(row);
+
+            for (int j = 0; j < 6; j++) {
+
+                int x = Commons.ALIEN_INIT_X + 18 * j;
                 int y = Commons.ALIEN_INIT_Y + 18 * i;
 
-                Alien alien = alienPrototype.clone(); //
+                Alien alien = alienPrototype.clone();
 
                 alien.setX(x);
                 alien.setY(y);
 
-                alien.getBomb().setX(x); // اتحكم في موقع الفضائي وقنبلته 
+                alien.getBomb().setX(x);
                 alien.getBomb().setY(y);
 
                 aliens.add(alien);
+                row.add(alien);
             }
         }
 
@@ -105,18 +111,7 @@ public class Board extends JPanel {
 
     private void drawAliens(Graphics g) {
 
-        for (Alien alien : aliens) {
-
-            if (alien.isVisible()) {
-
-                g.drawImage(alien.getImage(), alien.getX(), alien.getY(), this);
-            }
-
-            if (alien.isDying()) {
-
-                alien.die();
-            }
-        }
+        alienFleet.draw(g, this);
     }
 
     private void drawPlayer(Graphics g) {
@@ -181,7 +176,10 @@ public class Board extends JPanel {
 
             if (timer.isRunning()) {
                 timer.stop();
-                sound.playGameOver(); // صوت الخساره
+
+                if (!message.equals("Game won!")) {
+                    sound.playGameOver(); // صوت الخساره
+                }
             }
 
             gameOver(g);
@@ -234,16 +232,18 @@ public class Board extends JPanel {
                 int alienY = alien.getY();
 
                 if (alien.isVisible() && shot.isVisible()) {
-                    if (shotX >= (alienX)
-                            && shotX <= (alienX + Commons.ALIEN_WIDTH)
-                            && shotY >= (alienY)
-                            && shotY <= (alienY + Commons.ALIEN_HEIGHT)) {
+                    if (shotX >= alienX
+                            && shotX <= alienX + Commons.ALIEN_WIDTH
+                            && shotY >= alienY
+                            && shotY <= alienY + Commons.ALIEN_HEIGHT) {
 
                         var ii = new ImageIcon(explImg);
                         alien.setImage(ii.getImage());
                         alien.setDying(true);
                         deaths++;
+
                         sound.playExplosion(); // صوت الانفجار لما يصيب الالين
+
                         shot.die();
                     }
                 }
@@ -263,32 +263,22 @@ public class Board extends JPanel {
 
         for (Alien alien : aliens) {
 
+            if (!alien.isVisible()) {
+                continue;
+            }
+
             int x = alien.getX();
 
             if (x >= Commons.BOARD_WIDTH - Commons.BORDER_RIGHT && direction != -1) {
 
                 direction = -1;
-
-                Iterator<Alien> i1 = aliens.iterator();
-
-                while (i1.hasNext()) {
-
-                    Alien a2 = i1.next();
-                    a2.setY(a2.getY() + Commons.GO_DOWN);
-                }
+                alienFleet.moveDown(Commons.GO_DOWN);
             }
 
             if (x <= Commons.BORDER_LEFT && direction != 1) {
 
                 direction = 1;
-
-                Iterator<Alien> i2 = aliens.iterator();
-
-                while (i2.hasNext()) {
-
-                    Alien a = i2.next();
-                    a.setY(a.getY() + Commons.GO_DOWN);
-                }
+                alienFleet.moveDown(Commons.GO_DOWN);
             }
         }
 
@@ -306,10 +296,11 @@ public class Board extends JPanel {
                     inGame = false;
                     message = "Invasion!";
                 }
-
-                alien.act(direction);
             }
         }
+
+        // Composite - move all aliens
+        alienFleet.move(direction);
 
         // bombs
         var generator = new Random();
