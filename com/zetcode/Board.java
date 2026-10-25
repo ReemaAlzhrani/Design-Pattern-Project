@@ -23,8 +23,8 @@ import java.util.Random;
 
 public class Board extends JPanel {
 
-    private static Board instance;
-
+    private static Board instance; //برايفت عشان محد يوصل له من برا الكلاس وستاتيك عشان المتغيرات االكل يسوفها 
+// انستانت عشن نحفظ نسخه وحده 
     private Dimension d;
     private List<Alien> aliens;
     private Player player;
@@ -34,13 +34,15 @@ public class Board extends JPanel {
     private int deaths = 0;
 
     private boolean inGame = true;
-    private String explImg = "src/images/explosion.png";
+    private String explImg = "images/explosion.png";
     private String message = "Game Over";
 
     private Timer timer;
 
+    private SoundFacade sound = new SoundFacade(); // Facade للصوت
 
-    private Board() {
+
+    private Board() { // عشان محد يوصل له من برا 
 
         initBoard();
         gameInit();
@@ -48,7 +50,7 @@ public class Board extends JPanel {
 
 
     public static synchronized Board getInstance() {
-
+// ساينكرونايزد عشان مايكرر الاوبجكت مرتين 
         if (instance == null) {
             instance = new Board();
         }
@@ -74,23 +76,23 @@ public class Board extends JPanel {
 
         aliens = new ArrayList<>();
 
-        Alien alienPrototype = new Alien(
+        Alien alienPrototype = new Alien( // الاساسي 
                 Commons.ALIEN_INIT_X,
                 Commons.ALIEN_INIT_Y
         );
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 6; j++) {
+        for (int i = 0; i < 4; i++) { // الصفوف 
+            for (int j = 0; j < 6; j++) { // الاعمده
 
-                int x = Commons.ALIEN_INIT_X + 18 * j;
+                int x = Commons.ALIEN_INIT_X + 18 * j; // اغير واتحكم في الكوبي 
                 int y = Commons.ALIEN_INIT_Y + 18 * i;
 
-                Alien alien = alienPrototype.clone();
+                Alien alien = alienPrototype.clone(); //
 
                 alien.setX(x);
                 alien.setY(y);
 
-                alien.getBomb().setX(x);
+                alien.getBomb().setX(x); // اتحكم في موقع الفضائي وقنبلته 
                 alien.getBomb().setY(y);
 
                 aliens.add(alien);
@@ -179,6 +181,7 @@ public class Board extends JPanel {
 
             if (timer.isRunning()) {
                 timer.stop();
+                sound.playGameOver(); // صوت الخساره
             }
 
             gameOver(g);
@@ -213,6 +216,7 @@ public class Board extends JPanel {
             inGame = false;
             timer.stop();
             message = "Game won!";
+            sound.playWin(); // صوت الفوز
         }
 
         // player
@@ -239,6 +243,7 @@ public class Board extends JPanel {
                         alien.setImage(ii.getImage());
                         alien.setDying(true);
                         deaths++;
+                        sound.playExplosion(); // صوت الانفجار لما يصيب الالين
                         shot.die();
                     }
                 }
@@ -392,6 +397,7 @@ public class Board extends JPanel {
                     if (!shot.isVisible()) {
 
                         shot = new Shot(x, y);
+                        sound.playShot(); // صوت النار
                     }
                 }
             }

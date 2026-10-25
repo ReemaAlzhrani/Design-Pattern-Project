@@ -1,6 +1,6 @@
 package com.zetcode.sprite;
 
-import javax.swing.ImageIcon;
+import javax.swing.ImageIcon; //عشان ننسخ الصوره بدون يرجع للملف  
 
 import java.awt.Image;
 
@@ -13,19 +13,19 @@ public class Alien extends Sprite implements Cloneable {
         initAlien(x, y);
     }
 
-    @Override
+    @Override  // يسوي سوبر كلون للالين ويعيد النسخه بكل الخصائص بعدها يسوي بمب لكل الين 
     public Alien clone() {
 
         try {
-            Alien copy = (Alien) super.clone();
+            Alien copy = (Alien) super.clone(); // ينسخ خصائص الفضائي 
 
-            copy.bomb = copy.new Bomb(
+            copy.bomb = copy.new Bomb( // ينسخ قنبله لكل فضائي 
                     bomb.getX(),
                     bomb.getY(),
                     bomb.getImage()
             );
 
-            copy.bomb.setDestroyed(bomb.isDestroyed());
+            copy.bomb.setDestroyed(bomb.isDestroyed()); 
 
             return copy;
 
@@ -41,7 +41,7 @@ public class Alien extends Sprite implements Cloneable {
 
         bomb = new Bomb(x, y);
 
-        var alienImg = "src/images/alien.png";
+        var alienImg = "images/alien.png";
         var ii = new ImageIcon(alienImg);
 
         setImage(ii.getImage());
@@ -57,16 +57,17 @@ public class Alien extends Sprite implements Cloneable {
         return bomb;
     }
 
-    public class Bomb extends Sprite {
+    public class Bomb extends Sprite { //انر كلاس 
 
         private boolean destroyed;
 
-        public Bomb(int x, int y) {
+        public Bomb(int x, int y) { //كونستكتر 
 
             initBomb(x, y);
         }
+     // الكونستكتر يستقبل ايمج لانه يستقبل نفس الصوره 
 
-        private Bomb(int x, int y, Image image) {
+        private Bomb(int x, int y, Image image) { 
 
             setDestroyed(true);
 
@@ -75,7 +76,6 @@ public class Alien extends Sprite implements Cloneable {
 
             setImage(image);
         }
-
         private void initBomb(int x, int y) {
 
             setDestroyed(true);
@@ -83,7 +83,7 @@ public class Alien extends Sprite implements Cloneable {
             this.x = x;
             this.y = y;
 
-            var bombImg = "src/images/bomb.png";
+            var bombImg = "images/bomb.png";
             var ii = new ImageIcon(bombImg);
             setImage(ii.getImage());
         }
